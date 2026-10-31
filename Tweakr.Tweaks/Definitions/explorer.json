@@ -1,0 +1,167 @@
+[
+  {
+    "id": "explorer.classic-context-menu",
+    "title": "Classic context menu",
+    "description": "Restore the full right-click menu instead of 'Show more options'.",
+    "category": "UI / Explorer",
+    "risk": "safe",
+    "why": "Windows 11 hides many commands behind an extra click. This adds an empty per-user COM override so the old menu is used. Removing it brings the new menu back.",
+    "os": {
+      "minBuild": 22000
+    },
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32",
+        "name": "(Default)",
+        "kind": "String",
+        "on": "",
+        "off": "<delete-key>"
+      }
+    ],
+    "postAction": "restartExplorer",
+    "tags": [
+      "appearance"
+    ],
+    "featured": true
+  },
+  {
+    "id": "explorer.show-file-extensions",
+    "title": "Show file extensions",
+    "description": "Always show .txt, .exe, etc. in file names.",
+    "category": "UI / Explorer",
+    "risk": "safe",
+    "why": "Hidden extensions make malicious files like 'invoice.pdf.exe' look harmless.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "HideFileExt",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      }
+    ],
+    "postAction": "restartExplorer",
+    "tags": [
+      "appearance"
+    ]
+  },
+  {
+    "id": "explorer.show-hidden-files",
+    "title": "Show hidden files",
+    "description": "Display files and folders marked as hidden.",
+    "category": "UI / Explorer",
+    "risk": "safe",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "Hidden",
+        "kind": "DWord",
+        "on": 1,
+        "off": 2
+      }
+    ],
+    "postAction": "restartExplorer",
+    "tags": [
+      "appearance"
+    ]
+  },
+  {
+    "id": "explorer.taskbar-align-left",
+    "title": "Left-aligned taskbar",
+    "description": "Move Windows 11 taskbar icons to the left.",
+    "category": "UI / Explorer",
+    "risk": "safe",
+    "os": {
+      "minBuild": 22000
+    },
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "TaskbarAl",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      }
+    ],
+    "postAction": "restartExplorer",
+    "tags": [
+      "appearance"
+    ]
+  },
+  {
+    "id": "explorer.open-this-pc",
+    "title": "Open Explorer to This PC",
+    "description": "File Explorer starts at your drives instead of Home.",
+    "category": "UI / Explorer",
+    "risk": "safe",
+    "tags": [
+      "appearance"
+    ],
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "LaunchTo",
+        "kind": "DWord",
+        "on": 1,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "explorer.compact-view",
+    "title": "Compact spacing in Explorer",
+    "description": "Fit more files on screen with tighter rows.",
+    "category": "UI / Explorer",
+    "risk": "safe",
+    "tags": [
+      "appearance"
+    ],
+    "os": {
+      "minBuild": 22000
+    },
+    "postAction": "restartExplorer",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "UseCompactMode",
+        "kind": "DWord",
+        "on": 1,
+        "off": 0
+      }
+    ]
+  },
+  {
+    "id": "explorer.full-path",
+    "title": "Show full path in the title bar",
+    "description": "See the whole folder path in Explorer's title bar.",
+    "category": "UI / Explorer",
+    "risk": "safe",
+    "tags": [
+      "appearance"
+    ],
+    "postAction": "restartExplorer",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CabinetState",
+        "name": "FullPath",
+        "kind": "DWord",
+        "on": 1,
+        "off": 0
+      }
+    ]
+  }
+]

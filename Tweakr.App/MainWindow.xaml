@@ -1,0 +1,1111 @@
+<Window x:Class="Tweakr.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Tweakr.App.ViewModels"
+        xmlns:svc="clr-namespace:Tweakr.App.Services"
+        xmlns:b="clr-namespace:Tweakr.App.Behaviors"
+        Title="Tweakr" Icon="Assets/tweakr.ico" Width="1180" Height="760" MinWidth="780" MinHeight="500"
+        WindowStyle="None" ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowSolidBrush}"
+        Foreground="{DynamicResource TextBrush}"
+        FontFamily="Segoe UI Variable, Segoe UsI">
+
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" GlassFrameThickness="-1" ResizeBorderThickness="6"
+                      CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="Root" Opacity="0" RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform><ScaleTransform x:Name="RootScale" ScaleX="0.96" ScaleY="0.96" /></Grid.RenderTransform>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- optional user background image (static) + dim layer; both sit under everything else -->
+        <Image Grid.RowSpan="2" Source="{Binding Settings.BackgroundImage}" Stretch="UniformToFill" IsHitTestVisible="False"
+               RenderOptions.BitmapScalingMode="HighQuality" />
+        <Border Grid.RowSpan="2" Background="Black" IsHitTestVisible="False" Opacity="{Binding Settings.BackgroundDim}"
+                Visibility="{Binding Settings.HasBackground, Converter={StaticResource BoolToVis}}" />
+
+        <!-- theme color wash (behind everything) -->
+        <Border Grid.RowSpan="2" Background="{DynamicResource ThemeTintBrush}" IsHitTestVisible="False" />
+
+        <!-- ================= Title bar ================= -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="190" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" Margin="18,0" VerticalAlignment="Center">
+                <Image Source="Assets/tweakr.png" Width="20" Height="20" Margin="0,0,9,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock Text="Tweakr" FontWeight="SemiBold" FontSize="14" />
+            </StackPanel>
+
+            <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- Delay: don't re-filter the whole list on every keystroke -->
+                <TextBox Style="{StaticResource SearchBox}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
+                <Button Style="{StaticResource ClearButton}" HorizontalAlignment="Right" Margin="0,0,5,0"
+                        Command="{Binding ClearSearchCommand}"
+                        Visibility="{Binding HasSearch, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Style="{StaticResource CaptionButton}" Content="&#xE921;" Click="Minimize_Click" AutomationProperties.Name="Minimize" />
+                <Button x:Name="MaxButton" Style="{StaticResource CaptionButton}" Content="&#xE922;" Click="Maximize_Click" AutomationProperties.Name="Maximize" />
+                <Button Style="{StaticResource CloseCaptionButton}" Content="&#xE8BB;" Click="Close_Click" AutomationProperties.Name="Close" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ================= Body ================= -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="190" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="0,2,0,0">
+                <Button Command="{Binding OpenDashboardCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Dashboard"><Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE80F;" FontFamily="{StaticResource IconFont}" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Home" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding OpenUtilitiesCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Utilities"><Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE756;" FontFamily="{StaticResource IconFont}" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Utilities" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding OpenDebloatCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Debloat"><Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE7B8;" FontFamily="{StaticResource IconFont}" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Debloat+" VerticalAlignment="Center" />
+                        <Border Background="#33A78BFA" CornerRadius="4" Padding="5,1" Margin="8,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="BETA" FontSize="9" FontWeight="SemiBold" Foreground="#FFA78BFA" />
+                        </Border>
+                    </StackPanel>
+                </Button>
+                </StackPanel>
+
+                <TextBlock Grid.Row="1" Text="TWEAKS" Style="{StaticResource SectionLabel}" Margin="20,16,0,4" />
+
+                <!-- PreviewMouseLeftButtonUp: clicking the already-selected category must still open the Tweaks page -->
+                <ListBox Grid.Row="2" FocusVisualStyle="{x:Null}" ItemsSource="{Binding Categories}" SelectedValuePath="Name" SelectedValue="{Binding SelectedCategory}"
+                         Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}"
+                         ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                         PreviewMouseLeftButtonUp="Category_PreviewMouseUp"
+                         ItemContainerStyle="{StaticResource SidebarItem}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="14" Width="22" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <StackPanel Grid.Row="3" Margin="0,0,0,10">
+                <Button Command="{Binding OpenStartupCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Startup"><Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE7E8;" FontFamily="{StaticResource IconFont}" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Startup" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding OpenSettingsCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Settings"><Setter Property="Background" Value="{DynamicResource SelectedFillBrush}" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFont}" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Settings" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Pages. NOTE: hosts get their default Visibility from the Style (not a local attribute),
+                 otherwise the local value would beat the trigger and the page could never show. -->
+            <Grid Grid.Column="1" Margin="8,0,0,0">
+
+                <!-- ===== Dashboard ===== -->
+                <Grid x:Name="DashboardHost">
+                    <Grid.RenderTransform><TranslateTransform x:Name="DashboardT" /></Grid.RenderTransform>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Dashboard"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <ScrollViewer Style="{StaticResource SlimScrollViewer}">
+                        <StackPanel Margin="6,4,24,40">
+                            <TextBlock FontSize="28" FontWeight="SemiBold">
+                                <Run Text="{Binding Greeting, Mode=OneWay}" /><Run Text=", " /><Run Text="{Binding UserName, Mode=OneWay}">
+                                    <Run.Foreground>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#FF60A5FA" Offset="0" />
+                                            <GradientStop Color="#FF34D399" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Run.Foreground>
+                                </Run>
+                            </TextBlock>
+
+                            <ItemsControl ItemsSource="{Binding InfoCards}" AlternationCount="100" Margin="-6,14,-6,0" Grid.IsSharedSizeScope="True">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><b:FluidWrapPanel MinItemWidth="260" /></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.Resources>
+                                    <DataTemplate DataType="{x:Type vm:InfoCardViewModel}">
+                                        <Border Style="{StaticResource CardStyle}" Padding="20,18">
+                                            <Grid>
+                                            <Grid.RowDefinitions><RowDefinition Height="Auto" SharedSizeGroup="InfoBody" /></Grid.RowDefinitions>
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Grid Width="46" Height="46" Margin="0,0,14,0">
+                                                        <Border CornerRadius="12" Background="{Binding TintFaint}" />
+                                                        <Path Data="{Binding Icon}" Fill="{Binding Tint}" Stretch="Uniform" Width="22" Height="22"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                    <StackPanel VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding Subtitle}" FontSize="12.5" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,2,0,0" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Label1}" FontSize="11.5" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,20,0,0" />
+                                                <TextBlock Text="{Binding Value1}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                                <TextBlock Text="{Binding Label2}" FontSize="11.5" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,14,0,0" />
+                                                <TextBlock Text="{Binding Value2}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                            </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.Resources>
+                            </ItemsControl>
+
+                            <!-- "PC running slow?" banner -->
+                            <Border Style="{StaticResource SettingsCard}" Margin="0,8,0,0" Padding="18,16">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Width="42" Height="42" Margin="0,0,16,0">
+                                        <Border CornerRadius="11" Background="#2622C55E" />
+                                        <Path Data="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"
+                                              Fill="#FF22C55E" Stretch="Uniform" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="PC running slow?" FontWeight="SemiBold" FontSize="15" />
+                                        <TextBlock Text="Try the tweaks to improve system performance and privacy. Every change can be previewed and undone."
+                                                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12.5" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <Button Grid.Column="2" Style="{StaticResource OutlinePillButton}" Command="{Binding OpenTweaksCommand}" Margin="16,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE945;" FontFamily="{StaticResource IconFont}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="Visit Tweaks" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Loading latest system data..." HorizontalAlignment="Center" Margin="0,18,0,0"
+                                       FontSize="12" Foreground="{DynamicResource SubtleTextBrush}"
+                                       Visibility="{Binding IsLoadingInfo, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ===== Tweaks ===== -->
+                <Grid x:Name="CardsHost">
+                    <Grid.RenderTransform><TranslateTransform x:Name="CardsT" /></Grid.RenderTransform>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Tweaks"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="6,4,24,12">
+                        <TextBlock Text="{Binding SelectedCategory, TargetNullValue=All}" FontSize="26" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" Style="{StaticResource SlimScrollViewer}">
+                        <!-- No Grid.IsSharedSizeScope / SharedSizeGroup here any more: it forced every card to be measured twice
+                             and scaled badly with 100+ cards. Cards use a fixed MinHeight on the body row instead. -->
+                        <ItemsControl ItemsSource="{Binding View}" AlternationCount="1000" Margin="0,0,14,110">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><b:FluidWrapPanel MinItemWidth="300" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.Resources>
+                                <DataTemplate DataType="{x:Type vm:TweakCardViewModel}">
+                                    <Border Style="{StaticResource CardStyle}">
+                                        <Grid>
+                                         <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" MinHeight="150" />
+                                            <RowDefinition Height="Auto" />
+                                         </Grid.RowDefinitions>
+                                         <Grid Grid.Row="0">
+                                          <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                          </Grid.RowDefinitions>
+                                            <!-- header: icon tile (+ danger badge) · title + risk chip · toggle -->
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid Width="40" Height="40" Margin="0,0,12,0" VerticalAlignment="Top" Background="Transparent"
+                                                      ToolTip="{Binding DangerReason}" ToolTipService.IsEnabled="{Binding HasDanger}"
+                                                      ToolTipService.InitialShowDelay="120" ToolTipService.ShowDuration="30000">
+                                                    <Border CornerRadius="11" Background="{DynamicResource TileFillBrush}" />
+                                                    <Border CornerRadius="11" Background="{DynamicResource AccentBrush}">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Opacity" Value="0" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Current}" Value="True"><Setter Property="Opacity" Value="0.22" /></DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="17"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{DynamicResource SubtleTextBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Current}" Value="True"><Setter Property="Foreground" Value="{DynamicResource AccentBrush}" /></DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <!-- danger badge: hover the icon to read why -->
+                                                    <Border Style="{StaticResource DangerBadge}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0"
+                                                            Visibility="{Binding HasDanger, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock Text="!" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </Grid>
+
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                        <Border Style="{StaticResource RiskChip}" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding RiskLabel}" FontSize="9.5" FontWeight="SemiBold" />
+                                                        </Border>
+                                                        <ItemsControl ItemsSource="{Binding Badges}" Focusable="False" IsTabStop="False">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Border Width="22" Height="22" CornerRadius="6" Margin="6,0,0,0" Background="{Binding Bg}"
+                                                                            ToolTip="{Binding Label}" ToolTipService.InitialShowDelay="150">
+                                                                        <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="11"
+                                                                                   Foreground="{Binding Fg}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <ToggleButton Grid.Column="2" VerticalAlignment="Top" Margin="8,9,0,0"
+                                                              Style="{StaticResource ToggleSwitchStyle}"
+                                                              IsChecked="{Binding Desired, Mode=TwoWay}"
+                                                              Visibility="{Binding IsToggle, Converter={StaticResource BoolToVis}}" />
+                                                <Button Grid.Column="2" VerticalAlignment="Top" Margin="8,6,0,0" Style="{StaticResource ExecuteButton}"
+                                                        Command="{Binding DataContext.ExecuteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Visibility="{Binding IsAction, Converter={StaticResource BoolToVis}}" />
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="1" Text="{Binding Description}" TextWrapping="Wrap" Margin="0,14,0,0" FontSize="12.5"
+                                                       Foreground="{DynamicResource SubtleTextBrush}" />
+
+                                            <TextBlock Grid.Row="2" Text="{Binding Error}" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="11.5" Foreground="#FFFF6B6B">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Error}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <!-- footer: blue details link · pending (pinned to the bottom of the body row) -->
+                                            <Grid Grid.Row="4" Margin="0,12,0,0">
+                                                <ToggleButton Style="{StaticResource LinkToggle}" HorizontalAlignment="Left"
+                                                              IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Why does this matter?" Foreground="{StaticResource LinkBrush}" />
+                                                        <TextBlock FontFamily="{StaticResource IconFont}" FontSize="9" Margin="6,1,0,0"
+                                                                   VerticalAlignment="Center" Foreground="{StaticResource LinkBrush}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="&#xE70D;" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsExpanded}" Value="True"><Setter Property="Text" Value="&#xE70E;" /></DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </ToggleButton>
+
+                                                <TextBlock Text="{Binding Estimate}" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11.5"
+                                                           Foreground="{DynamicResource AccentBrush}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Estimate}" Value="{x:Null}"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                            Visibility="{Binding IsPending, Converter={StaticResource BoolToVis}}">
+                                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBrush}" Margin="0,0,5,0" />
+                                                    <TextBlock Text="Pending" FontSize="11" Foreground="{DynamicResource AccentBrush}" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            </Grid>
+
+                                            <!-- animated details (only this card grows) -->
+                                            <StackPanel Grid.Row="1" Visibility="Collapsed" b:Reveal.IsOpen="{Binding IsExpanded}">
+                                                <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,10" />
+                                                <TextBlock Text="{Binding Why}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource SubtleTextBrush}" />
+
+                                                <TextBlock Text="Requires a reboot" FontSize="11.5" Foreground="#FFFFB340" Margin="0,10,0,0"
+                                                           Visibility="{Binding RequiresReboot, Converter={StaticResource BoolToVis}}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.Resources>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Floating pending bar -->
+                    <Border Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,24"
+                            Padding="18,10" CornerRadius="14" BorderThickness="1" BorderBrush="#33FFFFFF" Background="{DynamicResource FloatingBarBrush}">
+                        <Border.RenderTransform><TranslateTransform Y="140" /></Border.RenderTransform>
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasPending}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="0:0:0.4">
+                                                        <DoubleAnimation.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.5" /></DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="140" Duration="0:0:0.25">
+                                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseIn" /></DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Margin="0,0,18,0">
+                                <Run Text="{Binding PendingCount, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=" pending changes" />
+                            </TextBlock>
+                            <Button Content="Discard" Style="{StaticResource PillButton}" Command="{Binding DiscardCommand}" Margin="0,0,8,0" />
+                            <Button Content="Preview" Style="{StaticResource PillButton}" Command="{Binding PreviewCommand}" Margin="0,0,8,0" />
+                            <Button Content="Apply" Style="{StaticResource AccentPillButton}" Command="{Binding ApplyCommand}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ===== Utilities ===== -->
+                <Grid x:Name="UtilitiesHost">
+                    <Grid.RenderTransform><TranslateTransform x:Name="UtilitiesT" /></Grid.RenderTransform>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Utilities"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <ScrollViewer Style="{StaticResource SlimScrollViewer}">
+                        <StackPanel Margin="6,4,24,40">
+                            <TextBlock Text="Utilities" FontSize="26" FontWeight="SemiBold" />
+                            <TextBlock Text="Windows tools, quick fixes and handy settings in one place." Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,4,0,0" />
+
+                            <ItemsControl ItemsSource="{Binding Utilities.Groups}" Margin="0,8,0,0" Focusable="False" IsTabStop="False">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" Style="{StaticResource SectionLabel}" />
+                                            <ItemsControl ItemsSource="{Binding Items}" Focusable="False" IsTabStop="False">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{StaticResource SettingsCard}" Padding="18,14" Margin="0,0,0,10">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="20"
+                                                                           Foreground="{DynamicResource SubtleTextBrush}" Width="30" Margin="0,0,16,0" VerticalAlignment="Center" />
+
+                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,16,0">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" />
+                                                                        <StackPanel Orientation="Horizontal" Margin="12,1,0,0" VerticalAlignment="Center"
+                                                                                    Visibility="{Binding HasCmd, Converter={StaticResource BoolToVis}}">
+                                                                            <TextBlock Text="CMD:" FontSize="11" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                                                                            <Border Background="#22FFFFFF" CornerRadius="4" Padding="6,1" Margin="5,0,0,0">
+                                                                                <TextBlock Text="{Binding Cmd}" FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource AccentBrush}" />
+                                                                            </Border>
+                                                                        </StackPanel>
+                                                                    </StackPanel>
+                                                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontSize="12.5"
+                                                                               Foreground="{DynamicResource SubtleTextBrush}" Margin="0,3,0,0" />
+                                                                </StackPanel>
+
+                                                                <!-- one of three controls, by kind -->
+                                                                <ToggleButton Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}"
+                                                                              IsChecked="{Binding IsOn, Mode=TwoWay}"
+                                                                              Visibility="{Binding IsToggle, Converter={StaticResource BoolToVis}}" />
+                                                                <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource AccentPillButton}"
+                                                                        Content="{Binding ButtonText}" Command="{Binding RunCommand}"
+                                                                        Visibility="{Binding IsAction, Converter={StaticResource BoolToVis}}" />
+                                                                <ComboBox Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource DarkCombo}"
+                                                                          ItemsSource="{Binding Choices}" DisplayMemberPath="Label"
+                                                                          SelectedItem="{Binding SelectedChoice, Mode=TwoWay}"
+                                                                          Visibility="{Binding IsChoice, Converter={StaticResource BoolToVis}}" />
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ===== Debloat+ =====
+                     Header stays fixed in row 0; the app list is its own virtualizing, scrolling ItemsControl in row 1,
+                     so only the rows on screen are ever created. -->
+                <Grid x:Name="DebloatHost">
+                    <Grid.RenderTransform><TranslateTransform x:Name="DebloatT" /></Grid.RenderTransform>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Debloat"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="6,4,24,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Debloat+" FontSize="26" FontWeight="SemiBold" />
+                            <Border Background="#33A78BFA" CornerRadius="5" Padding="7,2" Margin="12,4,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="BETA" FontSize="10" FontWeight="SemiBold" Foreground="#FFA78BFA" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Remove preinstalled and sponsored apps you don't use. Anything you remove can be reinstalled from the Microsoft Store."
+                                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,4,0,0" />
+
+                        <!-- toolbar -->
+                        <WrapPanel Margin="0,18,0,10" IsEnabled="{Binding Debloat.IsIdle}">
+                            <ListBox Style="{StaticResource SegmentList}" ItemContainerStyle="{StaticResource SegmentItem}" Margin="0,0,10,8"
+                                     ItemsSource="{Binding Debloat.FilterOptions}" SelectedItem="{Binding Debloat.Filter}" />
+                            <Button Content="Select recommended" Style="{StaticResource PillButton}" Command="{Binding Debloat.SelectRecommendedCommand}" Margin="0,0,8,8" />
+                            <Button Content="Clear" Style="{StaticResource PillButton}" Command="{Binding Debloat.ClearSelectionCommand}" Margin="0,0,8,8" />
+                            <Button Content="Rescan" Style="{StaticResource PillButton}" Command="{Binding Debloat.RescanCommand}" Margin="0,0,8,8" />
+                            <Button Content="{Binding Debloat.RemoveLabel}" Style="{StaticResource AccentPillButton}" Command="{Binding Debloat.RemoveSelectedCommand}"
+                                    IsEnabled="{Binding Debloat.HasSelection}" Margin="0,0,8,8" />
+                        </WrapPanel>
+
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Text="Also remove from the Windows image" FontWeight="SemiBold" />
+                                    <TextBlock Text="Stops removed apps from coming back for new user accounts. Leave off if you only care about this account."
+                                               TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding Debloat.IncludeImage, Mode=TwoWay}" />
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Text="Looking for settings, not apps?" FontWeight="SemiBold" />
+                                    <TextBlock Text="Turn off suggestions, ads, Widgets and automatic app installs from the Debloat tweaks."
+                                               TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="Debloat tweaks" Style="{StaticResource OutlinePillButton}" Command="{Binding OpenDebloatTweaksCommand}" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Scanning installed apps..." HorizontalAlignment="Center" Margin="0,24,0,0" FontSize="12"
+                                   Foreground="{DynamicResource SubtleTextBrush}"
+                                   Visibility="{Binding Debloat.IsScanning, Converter={StaticResource BoolToVis}}" />
+                        <TextBlock Text="Nothing to remove. None of the apps on this list are installed." HorizontalAlignment="Center" Margin="0,24,0,0" FontSize="12.5"
+                                   Foreground="{DynamicResource SubtleTextBrush}"
+                                   Visibility="{Binding Debloat.ShowEmpty, Converter={StaticResource BoolToVis}}" />
+                    </StackPanel>
+
+                    <!-- CanContentScroll=True + VirtualizingStackPanel (Recycling, pixel scrolling) = only visible rows are built -->
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Debloat.View}" Margin="6,8,0,0" Focusable="False" IsTabStop="False"
+                                  ScrollViewer.CanContentScroll="True"
+                                  VirtualizingPanel.IsVirtualizing="True"
+                                  VirtualizingPanel.VirtualizationMode="Recycling"
+                                  VirtualizingPanel.ScrollUnit="Pixel">
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <ScrollViewer Style="{StaticResource SlimScrollViewer}" CanContentScroll="True" Focusable="False">
+                                    <ItemsPresenter Margin="0,0,0,40" />
+                                </ScrollViewer>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource SettingsCard}" Padding="16,12" Margin="0,0,18,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Style="{StaticResource TickBox}" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,14,0" />
+                                        <Grid Grid.Column="1" Width="38" Height="38" Margin="0,0,14,0">
+                                            <Border CornerRadius="10" Background="{DynamicResource TileFillBrush}" />
+                                            <!-- first letter only until the real icon has loaded (or if the app has none) -->
+                                            <TextBlock Text="{Binding Initial}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Icon}" Value="{x:Null}"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <Image Source="{Binding Icon}" Width="26" Height="26" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                                        </Grid>
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13.5" />
+                                                <Border Style="{StaticResource RiskChip}" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding LevelLabel}" FontSize="9.5" FontWeight="SemiBold" />
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,3,0,0" />
+                                            <TextBlock Text="{Binding PackageName}" FontFamily="Consolas" FontSize="10.5" Opacity="0.6"
+                                                       Foreground="{DynamicResource SubtleTextBrush}" Margin="0,3,0,0" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="3" Text="{Binding Status}" FontSize="12" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+
+                <!-- ===== Startup ===== -->
+                <Grid x:Name="StartupHost">
+                    <Grid.RenderTransform><TranslateTransform x:Name="StartupT" /></Grid.RenderTransform>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Startup"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <ScrollViewer Style="{StaticResource SlimScrollViewer}">
+                        <StackPanel Margin="6,4,24,40" MaxWidth="760" HorizontalAlignment="Left">
+                            <TextBlock Text="Startup" FontSize="26" FontWeight="SemiBold" />
+                            <TextBlock Text="Choose which tweaks Tweakr applies every time you sign in." Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,4,0,0" />
+
+                            <Border Style="{StaticResource SettingsCard}" Margin="0,18,0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="Run Tweakr at sign-in" FontWeight="SemiBold" />
+                                        <TextBlock Text="Adds a scheduled task that starts Tweakr silently with admin rights, applies the tweaks below, then closes. No window, no UAC prompt."
+                                                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding Startup.LastRunText}" TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="11.5" Margin="0,8,0,0" />
+                                    </StackPanel>
+                                    <ToggleButton Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding Startup.RunAtStartup, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource SettingsCard}" Background="#1A60A5FA" BorderBrush="#4460A5FA"
+                                    Visibility="{Binding Startup.ShowTaskHint, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="You've picked tweaks, but “Run Tweakr at sign-in” is off. Turn it on above for them to be applied."
+                                           TextWrapping="Wrap" FontSize="12.5" Foreground="{StaticResource LinkBrush}" />
+                            </Border>
+
+                            <Grid Margin="4,10,0,8">
+                                <TextBlock Text="TWEAKS" Style="{StaticResource SectionLabel}" Margin="0" />
+                                <TextBlock Text="{Binding Startup.SelectedSummary}" HorizontalAlignment="Right" FontSize="11.5"
+                                           Foreground="{DynamicResource SubtleTextBrush}" />
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{Binding Startup.Items}">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Startup.RunAtStartup}" Value="False"><Setter Property="Opacity" Value="0.6" /></DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource SettingsCard}" Padding="16,12">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid Width="36" Height="36" Margin="0,0,14,0">
+                                                    <Border CornerRadius="10" Background="{DynamicResource TileFillBrush}" />
+                                                    <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="15"
+                                                               Foreground="{DynamicResource SubtleTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Grid>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13.5" />
+                                                        <Border Style="{StaticResource RiskChip}" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding RiskLabel}" FontSize="9.5" FontWeight="SemiBold" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding KindText}" FontSize="12" Foreground="{DynamicResource SubtleTextBrush}" Margin="0,3,0,0" />
+                                                </StackPanel>
+                                                <ToggleButton Grid.Column="2" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ===== Settings ===== -->
+                <Grid x:Name="SettingsHost">
+                    <Grid.RenderTransform><TranslateTransform x:Name="SettingsT" /></Grid.RenderTransform>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Page}" Value="Settings"><Setter Property="Visibility" Value="Visible" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <ScrollViewer Style="{StaticResource SlimScrollViewer}">
+                        <StackPanel Margin="6,4,24,40" MaxWidth="720" HorizontalAlignment="Left">
+                            <TextBlock Text="Settings" FontSize="26" FontWeight="SemiBold" />
+                            <TextBlock Text="Changes apply instantly and are saved automatically." Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,4,0,0" />
+
+                            <TextBlock Text="APPEARANCE" Style="{StaticResource SectionLabel}" />
+                            <Border Style="{StaticResource SettingsCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="Window backdrop" FontWeight="SemiBold" />
+                                        <TextBlock Text="Mica and Acrylic need Windows 11 22H2 or newer; older systems use Solid." TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <ListBox Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource SegmentList}"
+                                             ItemsSource="{Binding Settings.BackdropOptions}" SelectedItem="{Binding Settings.Backdrop}"
+                                             ItemContainerStyle="{StaticResource SegmentItem}" />
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource SettingsCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="Accent color" FontWeight="SemiBold" />
+                                        <TextBlock Text="Used for toggles and highlights. 'System' follows Windows." TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <ListBox Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource SwatchList}"
+                                             ItemsSource="{Binding Settings.AccentOptions}" SelectedItem="{Binding Settings.SelectedAccent}"
+                                             ItemContainerStyle="{StaticResource SwatchItem}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Ellipse Width="18" Height="18" Fill="{Binding Brush}" ToolTip="{Binding Name}" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource SettingsCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Theme" FontWeight="SemiBold" />
+                                    <TextBlock Text="A color wash for the whole app. It sits on top of Mica, Acrylic or Solid." TextWrapping="Wrap"
+                                               Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    <ListBox Style="{StaticResource ThemeList}" Margin="-2,12,0,0"
+                                             ItemsSource="{Binding Settings.ThemeOptions}" SelectedItem="{Binding Settings.SelectedTheme}"
+                                             ItemContainerStyle="{StaticResource ThemeItem}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Width="88">
+                                                    <Border Height="50" CornerRadius="9" Background="{Binding Preview}" BorderBrush="#33FFFFFF" BorderThickness="1" />
+                                                    <TextBlock Text="{Binding Name}" FontSize="11.5" HorizontalAlignment="Center" Margin="0,7,0,2" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource SettingsCard}">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                            <TextBlock Text="Background image" FontWeight="SemiBold" />
+                                            <TextBlock Text="A still picture behind the app (PNG, JPG or BMP). While one is set it covers the window backdrop."
+                                                       TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="Remove" Style="{StaticResource PillButton}" Command="{Binding Settings.RemoveBackgroundCommand}" Margin="0,0,8,0"
+                                                    Visibility="{Binding Settings.HasBackground, Converter={StaticResource BoolToVis}}" />
+                                            <Button Content="Choose image…" Style="{StaticResource AccentPillButton}" Command="{Binding Settings.ChooseBackgroundCommand}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <Grid Margin="0,14,0,0" Visibility="{Binding Settings.HasBackground, Converter={StaticResource BoolToVis}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="48" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Dim" FontSize="12" Foreground="{DynamicResource SubtleTextBrush}" VerticalAlignment="Center" Margin="0,0,14,0" />
+                                        <Slider Grid.Column="1" Style="{StaticResource AccentSlider}" Minimum="0" Maximum="0.9" LargeChange="0.1"
+                                                Value="{Binding Settings.BackgroundDim, Mode=TwoWay}" AutomationProperties.Name="Background dim" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Settings.BackgroundDim, StringFormat={}{0:P0}}" FontSize="12"
+                                                   Foreground="{DynamicResource SubtleTextBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="MOTION" Style="{StaticResource SectionLabel}" />
+                            <Border Style="{StaticResource SettingsCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="Animations" FontWeight="SemiBold" />
+                                        <TextBlock Text="Card entrance, hover and expand motion, page transitions and apply feedback. Also off when Windows animation effects are off."
+                                                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <ToggleButton Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding Settings.AnimationsEnabled, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="SAFETY" Style="{StaticResource SectionLabel}" />
+                            <Border Style="{StaticResource SettingsCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="Create a restore point before applying" FontWeight="SemiBold" />
+                                        <TextBlock Text="Once per session. Windows may skip it if one was already made in the last 24 hours."
+                                                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <ToggleButton Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding Settings.CreateRestorePoint, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource SettingsCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="Revert everything" FontWeight="SemiBold" />
+                                        <TextBlock Text="Undo every change Tweakr has made, newest first."
+                                                   Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Revert all" Style="{StaticResource DangerPillButton}" Command="{Binding RevertAllCommand}" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="INTEGRATIONS" Style="{StaticResource SectionLabel}" />
+                            <Border Style="{StaticResource SettingsCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="Discord Rich Presence" FontWeight="SemiBold" />
+                                        <TextBlock Text="Shows that you're using Tweakr, which page you're on and how many tweaks are active. Nothing else is shared."
+                                                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <ToggleButton Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding Settings.DiscordEnabled, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="DATA" Style="{StaticResource SectionLabel}" />
+                            <Border Style="{StaticResource SettingsCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="History and settings" FontWeight="SemiBold" />
+                                        <TextBlock Text="Change log and preferences are stored in %LocalAppData%\Tweakr."
+                                                   Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Open folder" Style="{StaticResource PillButton}" Command="{Binding Settings.OpenDataFolderCommand}" />
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="ABOUT" Style="{StaticResource SectionLabel}" />
+                            <Border Style="{StaticResource SettingsCard}" Padding="18,18">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="Assets/tweakr.png" Width="46" Height="46" Margin="0,0,14,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Tweakr" FontSize="18" FontWeight="SemiBold" />
+                                            <TextBlock Text="Safe, transparent Windows tweaks. Every change is previewable and reversible."
+                                                       Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <Grid Margin="0,18,0,0">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="100" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Text="Version" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,0,0,8" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Settings.AppVersion}" FontSize="12.5" />
+                                        <TextBlock Grid.Row="1" Text="Runtime" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" Margin="0,0,0,8" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Settings.RuntimeText}" FontSize="12.5" />
+                                        <TextBlock Grid.Row="2" Text="Windows" Foreground="{DynamicResource SubtleTextBrush}" FontSize="12" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Settings.OsText}" FontSize="12.5" TextWrapping="Wrap" />
+                                    </Grid>
+
+                                    <Button Content="Copy diagnostics" Style="{StaticResource PillButton}" HorizontalAlignment="Left" Margin="0,16,0,0"
+                                            Command="{Binding Settings.CopyDiagnosticsCommand}" />
+                                    <TextBlock Text="Built with .NET and WPF." Foreground="{DynamicResource SubtleTextBrush}" FontSize="11.5" Margin="0,12,0,0" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ================= Toasts ================= -->
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Toasts.Items}" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                      Margin="0,0,20,20" Focusable="False" IsTabStop="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type svc:ToastItem}">
+                    <Border Style="{StaticResource ToastCard}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource ToastIcon}" Margin="0,0,12,0" VerticalAlignment="Top">
+                                <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="12"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13.5" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"
+                                           Foreground="{DynamicResource SubtleTextBrush}"
+                                           Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}" />
+                            </StackPanel>
+                            <Button Grid.Column="2" Style="{StaticResource ClearButton}" Command="{Binding CloseCommand}"
+                                    VerticalAlignment="Top" Margin="8,-2,-6,0" AutomationProperties.Name="Dismiss" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- ================= Dialog (replaces MessageBox) ================= -->
+        <Grid x:Name="DialogLayer" Grid.RowSpan="2" Visibility="Collapsed" DataContext="{Binding Dialog}">
+            <Border x:Name="Scrim" Background="#B3000000" />
+            <Border x:Name="DialogCard" Width="500" MaxHeight="640" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    CornerRadius="16" Padding="24,22" Background="{DynamicResource DialogCardBrush}" BorderBrush="#33FFFFFF" BorderThickness="1"
+                    RenderTransformOrigin="0.5,0.5" Focusable="True" FocusVisualStyle="{x:Null}">
+                <Border.RenderTransform><ScaleTransform x:Name="DialogScale" ScaleX="1" ScaleY="1" /></Border.RenderTransform>
+                <Border.Effect><DropShadowEffect BlurRadius="40" ShadowDepth="8" Opacity="0.5" /></Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Border Style="{StaticResource DialogGlyphBadge}" Margin="0,0,14,0">
+                            <TextBlock FontFamily="{StaticResource IconFont}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="&#xE946;" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDanger}" Value="True"><Setter Property="Text" Value="&#xE7BA;" /></DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                        <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Text="{Binding Message}" TextWrapping="Wrap" FontSize="13" LineHeight="19"
+                               Foreground="{DynamicResource DialogTextBrush}" Margin="0,16,0,0" />
+
+                    <ScrollViewer Grid.Row="2" Style="{StaticResource SlimScrollViewer}" MaxHeight="300" Margin="0,6,0,0"
+                                  Visibility="{Binding HasChanges, Converter={StaticResource BoolToVis}}">
+                        <ItemsControl ItemsSource="{Binding Changes}" Margin="0,0,10,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,10,0,0">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" />
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#10FFFFFF" CornerRadius="8" Padding="10,7" Margin="0,5,0,0">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Target}" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource SubtleTextBrush}" />
+                                                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                                                <TextBlock Text="{Binding Old}" FontSize="12.5" Foreground="#FFFF8A8A" />
+                                                                <TextBlock Text="  →  " FontSize="12.5" Foreground="{DynamicResource SubtleTextBrush}" />
+                                                                <TextBlock Text="{Binding New}" FontSize="12.5" Foreground="#FF4ADE80" />
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+                        <Button Content="{Binding SecondaryText}" Style="{StaticResource PillButton}" Command="{Binding SecondaryCommand}"
+                                Margin="0,0,8,0" Visibility="{Binding HasSecondary, Converter={StaticResource BoolToVis}}" />
+                        <Button Content="{Binding PrimaryText}" Command="{Binding PrimaryCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource AccentPillButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDanger}" Value="True">
+                                            <Setter Property="Background" Value="#FFEF4444" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

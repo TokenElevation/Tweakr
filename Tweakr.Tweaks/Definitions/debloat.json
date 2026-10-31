@@ -1,0 +1,155 @@
+[
+  {
+    "id": "debloat.suggestions",
+    "title": "Disable suggestions and ads",
+    "description": "Remove tips, suggestions and promotions from Start, Settings and the lock screen.",
+    "category": "Debloat",
+    "risk": "safe",
+    "tags": [
+      "privacy"
+    ],
+    "featured": true,
+    "why": "Windows uses these settings to show sponsored suggestions and 'tips' that are really ads.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338387Enabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338388Enabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338389Enabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-310093Enabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SystemPaneSuggestionsEnabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SoftLandingEnabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "RotatingLockScreenOverlayEnabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      }
+    ]
+  },
+  {
+    "id": "debloat.consumer-features",
+    "title": "Stop automatic app installs",
+    "description": "Stop Windows from silently installing sponsored apps.",
+    "category": "Debloat",
+    "risk": "safe",
+    "tags": [
+      "privacy",
+      "performance"
+    ],
+    "featured": true,
+    "why": "Without this, Windows can install apps like Candy Crush or Spotify on its own after updates and for new accounts.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+        "name": "DisableWindowsConsumerFeatures",
+        "kind": "DWord",
+        "on": 1,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "debloat.widgets",
+    "title": "Disable Widgets",
+    "description": "Remove the Widgets board and its background process.",
+    "category": "Debloat",
+    "risk": "safe",
+    "tags": [
+      "performance",
+      "appearance"
+    ],
+    "requiresReboot": true,
+    "os": {
+      "minBuild": 22000
+    },
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Dsh",
+        "name": "AllowNewsAndInterests",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "debloat.chat-icon",
+    "title": "Hide the Chat icon",
+    "description": "Remove the Teams Chat button from the taskbar.",
+    "category": "Debloat",
+    "risk": "safe",
+    "tags": [
+      "appearance"
+    ],
+    "os": {
+      "minBuild": 22000,
+      "maxBuild": 22631
+    },
+    "postAction": "restartExplorer",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Chat",
+        "name": "ChatIcon",
+        "kind": "DWord",
+        "on": 3,
+        "off": "<delete>"
+      }
+    ]
+  }
+]

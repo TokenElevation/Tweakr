@@ -1,0 +1,481 @@
+[
+  {
+    "id": "util.restart-gpu",
+    "title": "Graphics Driver",
+    "description": "Restart your graphics driver to fix display issues.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Quick fixes",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue7f4",
+    "buttonText": "Restart",
+    "operations": [
+      {
+        "type": "restartGraphicsDriver"
+      }
+    ]
+  },
+  {
+    "id": "util.restart-ui",
+    "title": "Windows Search and UI",
+    "description": "Restart your Windows Search and UI to fix display issues. (May take a while)",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Quick fixes",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue721",
+    "buttonText": "Restart",
+    "operations": [
+      {
+        "type": "killProcesses",
+        "names": [
+          "explorer",
+          "SearchHost",
+          "SearchApp",
+          "StartMenuExperienceHost",
+          "ShellExperienceHost"
+        ],
+        "message": "Windows is restarting its shell. Your taskbar will reappear in a moment."
+      }
+    ]
+  },
+  {
+    "id": "util.disk-cleanup",
+    "title": "Disk Cleaner",
+    "description": "Free up space by removing unnecessary files.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Maintenance",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ueda2",
+    "cmd": "cleanmgr",
+    "buttonText": "Clean Now",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "cleanmgr.exe",
+        "message": "Opened Disk Cleanup."
+      }
+    ]
+  },
+  {
+    "id": "util.sfc",
+    "title": "System File Checker",
+    "description": "Scan Windows for corrupted system files and repair them.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Maintenance",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue895",
+    "cmd": "sfc /scannow",
+    "buttonText": "Run",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "cmd.exe",
+        "message": "Started the scan in a console window. It can take several minutes.",
+        "args": "/k sfc /scannow"
+      }
+    ]
+  },
+  {
+    "id": "util.restore",
+    "title": "System Restore",
+    "description": "Roll Windows back to an earlier restore point.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Maintenance",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue81c",
+    "cmd": "rstrui",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "rstrui.exe",
+        "message": "Opened System Restore."
+      }
+    ]
+  },
+  {
+    "id": "util.startup-apps",
+    "title": "Startup Apps",
+    "description": "Choose which apps start when you sign in.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Maintenance",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue7e8",
+    "cmd": "ms-settings:startupapps",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "ms-settings:startupapps",
+        "message": "Opened Startup apps."
+      }
+    ]
+  },
+  {
+    "id": "util.msinfo",
+    "title": "System Information",
+    "description": "View detailed information about your system.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue946",
+    "cmd": "msinfo32",
+    "buttonText": "View Info",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "msinfo32.exe",
+        "message": "Opened System Information."
+      }
+    ]
+  },
+  {
+    "id": "util.taskmgr",
+    "title": "Task Manager",
+    "description": "See what is using your CPU, memory, disk and network.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue945",
+    "cmd": "taskmgr",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "taskmgr.exe",
+        "message": "Opened Task Manager."
+      }
+    ]
+  },
+  {
+    "id": "util.devmgmt",
+    "title": "Device Manager",
+    "description": "View and manage your hardware and drivers.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue7f8",
+    "cmd": "devmgmt.msc",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "devmgmt.msc",
+        "message": "Opened Device Manager."
+      }
+    ]
+  },
+  {
+    "id": "util.diskmgmt",
+    "title": "Disk Management",
+    "description": "Create, resize and format partitions.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ueda2",
+    "cmd": "diskmgmt.msc",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "diskmgmt.msc",
+        "message": "Opened Disk Management."
+      }
+    ]
+  },
+  {
+    "id": "util.services",
+    "title": "Services",
+    "description": "Start, stop and configure Windows services.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue713",
+    "cmd": "services.msc",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "services.msc",
+        "message": "Opened Services."
+      }
+    ]
+  },
+  {
+    "id": "util.resmon",
+    "title": "Resource Monitor",
+    "description": "Detailed live view of CPU, memory, disk and network use.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue7f4",
+    "cmd": "resmon",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "resmon.exe",
+        "message": "Opened Resource Monitor."
+      }
+    ]
+  },
+  {
+    "id": "util.netconn",
+    "title": "Network Connections",
+    "description": "Manage your adapters and their settings.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue774",
+    "cmd": "ncpa.cpl",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "ncpa.cpl",
+        "message": "Opened Network Connections."
+      }
+    ]
+  },
+  {
+    "id": "util.appwiz",
+    "title": "Programs and Features",
+    "description": "Uninstall or repair installed programs.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue71d",
+    "cmd": "appwiz.cpl",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "appwiz.cpl",
+        "message": "Opened Programs and Features."
+      }
+    ]
+  },
+  {
+    "id": "util.regedit",
+    "title": "Registry Editor",
+    "description": "Browse and edit the Windows registry. Be careful in here.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "System tools",
+    "kind": "action",
+    "risk": "safe",
+    "icon": "\ue70f",
+    "cmd": "regedit",
+    "buttonText": "Open",
+    "operations": [
+      {
+        "type": "launch",
+        "file": "regedit.exe",
+        "message": "Opened Registry Editor."
+      }
+    ]
+  },
+  {
+    "id": "util.power-plan",
+    "title": "Power Plan",
+    "description": "Choose how your computer manages power and performance.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Settings",
+    "kind": "choice",
+    "risk": "safe",
+    "icon": "\ue7e8",
+    "choices": [
+      {
+        "label": "Balanced",
+        "value": "381b4222-f694-41f0-9685-ff5bb260df2e"
+      },
+      {
+        "label": "High performance",
+        "value": "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
+      },
+      {
+        "label": "Power saver",
+        "value": "a1841308-3541-4fab-bc81-f71556f20b4a"
+      },
+      {
+        "label": "Ultimate Performance",
+        "value": "e9a42b02-d5df-448d-aa00-03f14749eb61"
+      }
+    ],
+    "operations": [
+      {
+        "type": "powerPlan"
+      }
+    ]
+  },
+  {
+    "id": "util.storage-sense",
+    "title": "Storage Sense",
+    "description": "Automatically free up space by getting rid of files you don't need.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Settings",
+    "kind": "toggle",
+    "risk": "safe",
+    "icon": "\ueda2",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy",
+        "name": "01",
+        "kind": "DWord",
+        "on": 1,
+        "off": 0
+      }
+    ]
+  },
+  {
+    "id": "util.fast-startup",
+    "title": "Fast Startup",
+    "description": "Improve boot times by optimizing startup settings.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Settings",
+    "kind": "toggle",
+    "risk": "safe",
+    "icon": "\ue945",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power",
+        "name": "HiberbootEnabled",
+        "kind": "DWord",
+        "on": 1,
+        "off": 0
+      }
+    ]
+  },
+  {
+    "id": "util.game-mode",
+    "title": "Game Mode",
+    "description": "Let Windows prioritize your game and pause background activity while you play.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Settings",
+    "kind": "toggle",
+    "risk": "safe",
+    "icon": "\ue7fc",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\GameBar",
+        "name": "AutoGameModeEnabled",
+        "kind": "DWord",
+        "on": 1,
+        "off": 0
+      }
+    ]
+  },
+  {
+    "id": "util.dark-mode",
+    "title": "Dark mode",
+    "description": "Use the dark theme for Windows and apps.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Settings",
+    "kind": "toggle",
+    "risk": "safe",
+    "icon": "\ue790",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "name": "AppsUseLightTheme",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "name": "SystemUsesLightTheme",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      }
+    ]
+  },
+  {
+    "id": "util.transparency",
+    "title": "Transparency effects",
+    "description": "Show translucent Mica and acrylic surfaces in Windows.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Settings",
+    "kind": "toggle",
+    "risk": "safe",
+    "icon": "\ue790",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "name": "EnableTransparency",
+        "kind": "DWord",
+        "on": 1,
+        "off": 0
+      }
+    ]
+  },
+  {
+    "id": "util.clock-seconds",
+    "title": "Seconds in the taskbar clock",
+    "description": "Show seconds next to the time.",
+    "category": "Utilities",
+    "page": "utilities",
+    "section": "Settings",
+    "kind": "toggle",
+    "risk": "safe",
+    "icon": "\ue916",
+    "postAction": "restartExplorer",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "ShowSecondsInSystemClock",
+        "kind": "DWord",
+        "on": 1,
+        "off": 0
+      }
+    ]
+  }
+]

@@ -1,0 +1,241 @@
+[
+  {
+    "id": "gaming.hags",
+    "title": "Hardware GPU scheduling",
+    "description": "Let the GPU manage its own video memory to cut latency.",
+    "category": "Gaming",
+    "risk": "moderate",
+    "tags": [
+      "gaming",
+      "performance"
+    ],
+    "featured": true,
+    "why": "Moves GPU memory scheduling from the CPU to the graphics card itself. Helps on supported GPUs and is required for features like DLSS Frame Generation.",
+    "danger": "On some GPU drivers this causes stutter or crashes. If a game misbehaves, switch it back off.",
+    "requiresReboot": true,
+    "os": {
+      "minBuild": 19041
+    },
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+        "name": "HwSchMode",
+        "kind": "DWord",
+        "on": 2,
+        "off": 1
+      }
+    ]
+  },
+  {
+    "id": "gaming.game-dvr",
+    "title": "Disable Game DVR capture",
+    "description": "Stop Windows from recording gameplay in the background.",
+    "category": "Gaming",
+    "risk": "safe",
+    "tags": [
+      "gaming",
+      "performance"
+    ],
+    "featured": true,
+    "why": "Game DVR keeps a capture pipeline running while you play, which costs a little FPS and can cause stutter.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "System\\GameConfigStore",
+        "name": "GameDVR_Enabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+        "name": "AppCaptureEnabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      }
+    ]
+  },
+  {
+    "id": "gaming.mouse-accel",
+    "title": "Disable mouse acceleration",
+    "description": "Make the cursor move the same distance for the same hand movement.",
+    "category": "Gaming",
+    "risk": "safe",
+    "tags": [
+      "gaming"
+    ],
+    "featured": true,
+    "why": "'Enhance pointer precision' speeds the cursor up the faster you move. Turning it off gives consistent aim. Takes effect after signing out.",
+    "requiresReboot": true,
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Control Panel\\Mouse",
+        "name": "MouseSpeed",
+        "kind": "String",
+        "on": "0",
+        "off": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Control Panel\\Mouse",
+        "name": "MouseThreshold1",
+        "kind": "String",
+        "on": "0",
+        "off": "6"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Control Panel\\Mouse",
+        "name": "MouseThreshold2",
+        "kind": "String",
+        "on": "0",
+        "off": "10"
+      }
+    ]
+  },
+  {
+    "id": "gaming.fullscreen-optimizations",
+    "title": "Disable fullscreen optimizations",
+    "description": "Run games in true exclusive fullscreen.",
+    "category": "Gaming",
+    "risk": "moderate",
+    "tags": [
+      "gaming"
+    ],
+    "why": "Windows runs many fullscreen games in a hybrid borderless mode. Disabling the optimization restores exclusive fullscreen, which can lower input latency.",
+    "danger": "Some newer games run worse or lose features such as Auto HDR without it. Revert if a game misbehaves.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "System\\GameConfigStore",
+        "name": "GameDVR_FSEBehaviorMode",
+        "kind": "DWord",
+        "on": 2,
+        "off": "<delete>"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "System\\GameConfigStore",
+        "name": "GameDVR_HonorUserFSEBehaviorMode",
+        "kind": "DWord",
+        "on": 1,
+        "off": "<delete>"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "System\\GameConfigStore",
+        "name": "GameDVR_DXGIHonorFSEWindowsCompatible",
+        "kind": "DWord",
+        "on": 1,
+        "off": "<delete>"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "System\\GameConfigStore",
+        "name": "GameDVR_EFSEFeatureFlags",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "gaming.system-responsiveness",
+    "title": "Prioritize foreground apps",
+    "description": "Give games more CPU time than background multimedia work.",
+    "category": "Gaming",
+    "risk": "moderate",
+    "tags": [
+      "gaming",
+      "performance"
+    ],
+    "why": "Windows reserves 20% of CPU time for background multimedia tasks by default. Setting this to 0 gives the foreground app priority.",
+    "danger": "Audio or video encoding in the background may glitch while a game is running.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+        "name": "SystemResponsiveness",
+        "kind": "DWord",
+        "on": 0,
+        "off": 20
+      }
+    ]
+  },
+  {
+    "id": "gaming.games-priority",
+    "title": "Raise game task priority",
+    "description": "Tell the scheduler that games are high-priority work.",
+    "category": "Gaming",
+    "risk": "moderate",
+    "tags": [
+      "gaming"
+    ],
+    "danger": "Heavy games can starve other apps of CPU time. Easy to switch back.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+        "name": "Priority",
+        "kind": "DWord",
+        "on": 6,
+        "off": 2
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+        "name": "Scheduling Category",
+        "kind": "String",
+        "on": "High",
+        "off": "Medium"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+        "name": "SFIO Priority",
+        "kind": "String",
+        "on": "High",
+        "off": "Normal"
+      }
+    ]
+  },
+  {
+    "id": "gaming.sticky-keys",
+    "title": "Disable the Sticky Keys shortcut",
+    "description": "Pressing Shift five times no longer interrupts your game.",
+    "category": "Gaming",
+    "risk": "safe",
+    "tags": [
+      "gaming"
+    ],
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Control Panel\\Accessibility\\StickyKeys",
+        "name": "Flags",
+        "kind": "String",
+        "on": "506",
+        "off": "510"
+      }
+    ]
+  }
+]

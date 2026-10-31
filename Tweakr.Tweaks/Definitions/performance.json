@@ -1,0 +1,135 @@
+[
+  {
+    "id": "performance.sysmain",
+    "title": "Disable SysMain (Superfetch)",
+    "description": "Stop the service that preloads frequently used apps into RAM.",
+    "category": "Performance",
+    "risk": "moderate",
+    "danger": "On hard drives this can make app launches and boot noticeably slower. On SSDs the gain is usually small. Easy to revert.",
+    "why": "Can reduce background disk/CPU use on some systems, but usually helps on HDDs and can slow app launches. Mostly pointless on fast SSDs; measure before keeping it.",
+    "operations": [
+      {
+        "type": "service",
+        "name": "SysMain",
+        "on": "disabled",
+        "off": "auto"
+      }
+    ],
+    "tags": [
+      "performance"
+    ]
+  },
+  {
+    "id": "performance.startup-delay",
+    "title": "Remove startup app delay",
+    "description": "Launch your startup apps right away instead of waiting a few seconds.",
+    "category": "Performance",
+    "risk": "safe",
+    "tags": [
+      "performance"
+    ],
+    "why": "After sign-in Windows deliberately waits before starting your startup apps. Setting the delay to zero removes that pause.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize",
+        "name": "StartupDelayInMSec",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "performance.menu-delay",
+    "title": "Faster menus",
+    "description": "Open menus instantly instead of after a short pause.",
+    "category": "Performance",
+    "risk": "safe",
+    "tags": [
+      "performance",
+      "appearance"
+    ],
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Control Panel\\Desktop",
+        "name": "MenuShowDelay",
+        "kind": "String",
+        "on": "0",
+        "off": "400"
+      }
+    ]
+  },
+  {
+    "id": "performance.window-animations",
+    "title": "Disable window animations",
+    "description": "Skip the minimize and maximize animations.",
+    "category": "Performance",
+    "risk": "safe",
+    "tags": [
+      "performance",
+      "appearance"
+    ],
+    "why": "Windows animates windows when they minimize or maximize. Turning this off makes the desktop feel a little snappier. Takes effect after signing out.",
+    "requiresReboot": true,
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Control Panel\\Desktop\\WindowMetrics",
+        "name": "MinAnimate",
+        "kind": "String",
+        "on": "0",
+        "off": "1"
+      }
+    ]
+  },
+  {
+    "id": "performance.background-apps",
+    "title": "Stop apps running in the background",
+    "description": "Prevent Store apps from working while closed.",
+    "category": "Performance",
+    "risk": "moderate",
+    "tags": [
+      "performance",
+      "privacy"
+    ],
+    "featured": true,
+    "why": "Many Store apps keep running after you close them, using CPU, RAM and battery.",
+    "danger": "Apps stop updating and sending notifications while closed. Chat apps from the Store may miss messages until you open them.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+        "name": "LetAppsRunInBackground",
+        "kind": "DWord",
+        "on": 2,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "performance.search-index",
+    "title": "Disable Windows Search indexing",
+    "description": "Stop the background indexer that scans your files.",
+    "category": "Performance",
+    "risk": "moderate",
+    "tags": [
+      "performance"
+    ],
+    "why": "The indexer keeps a database of your files so searches are fast, at the cost of background disk and CPU use.",
+    "danger": "Start menu and Explorer searches get slower, and apps that rely on the index (such as Outlook search) may stop finding things.",
+    "operations": [
+      {
+        "type": "service",
+        "name": "WSearch",
+        "on": "disabled",
+        "off": "auto"
+      }
+    ]
+  }
+]

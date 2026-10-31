@@ -1,0 +1,49 @@
+[
+  {
+    "id": "network.disable-throttling",
+    "title": "Disable network throttling",
+    "description": "Remove the multimedia network throttling limit.",
+    "category": "Network",
+    "risk": "moderate",
+    "danger": "Without the limit, background network tasks can compete with games and calls, and the gains are often too small to measure. Easy to revert.",
+    "why": "Windows throttles non-multimedia network traffic while media is playing (default 10 packets/ms). Disabling it can help latency-sensitive use, but gains are small and not guaranteed.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+        "name": "NetworkThrottlingIndex",
+        "kind": "DWord",
+        "on": 4294967295,
+        "off": 10
+      }
+    ],
+    "tags": [
+      "performance",
+      "gaming"
+    ]
+  },
+  {
+    "id": "network.delivery-optimization",
+    "title": "Disable update sharing",
+    "description": "Stop uploading Windows updates to other PCs.",
+    "category": "Network",
+    "risk": "safe",
+    "tags": [
+      "network",
+      "privacy"
+    ],
+    "why": "Delivery Optimization can use your connection to send update files to other PCs. Mode 0 downloads updates from Microsoft only; updates still work normally.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DeliveryOptimization\\Config",
+        "name": "DODownloadMode",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      }
+    ]
+  }
+]

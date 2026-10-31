@@ -1,0 +1,109 @@
+[
+  {
+    "id": "cleanup.temp-files",
+    "title": "Clean temporary files",
+    "description": "Delete leftover files from your user and Windows temp folders.",
+    "category": "Cleanup",
+    "kind": "action",
+    "risk": "safe",
+    "why": "Apps and installers leave scratch files in temp folders and rarely clean them up. Files that are currently in use are skipped, so it won't break anything that's running.",
+    "operations": [
+      {
+        "type": "cleanup",
+        "paths": [
+          "%TEMP%",
+          "%WINDIR%\\Temp"
+        ]
+      }
+    ],
+    "tags": [
+      "cleanup",
+      "performance"
+    ],
+    "featured": true
+  },
+  {
+    "id": "cleanup.shader-cache",
+    "title": "Clear shader caches",
+    "description": "Remove DirectX, NVIDIA and AMD shader caches.",
+    "category": "Cleanup",
+    "kind": "action",
+    "risk": "safe",
+    "why": "Shader caches can grow to several GB or get corrupted, which sometimes causes stutter. Games rebuild them on the next launch, so the first launch afterwards can be a little slower.",
+    "operations": [
+      {
+        "type": "cleanup",
+        "paths": [
+          "%LOCALAPPDATA%\\D3DSCache",
+          "%LOCALAPPDATA%\\NVIDIA\\DXCache",
+          "%LOCALAPPDATA%\\NVIDIA\\GLCache",
+          "%LOCALAPPDATA%\\AMD\\DxCache"
+        ]
+      }
+    ],
+    "tags": [
+      "cleanup",
+      "gaming"
+    ]
+  },
+  {
+    "id": "cleanup.update-cache",
+    "title": "Clear Windows Update cache",
+    "description": "Delete downloaded update files that Windows no longer needs.",
+    "category": "Cleanup",
+    "kind": "action",
+    "risk": "moderate",
+    "why": "Windows keeps the installers of past updates in SoftwareDistribution\\Download. Clearing it frees space and can fix an update that is stuck.",
+    "danger": "Updates that were downloaded but not yet installed have to be downloaded again. Don't run this while Windows is installing updates.",
+    "operations": [
+      {
+        "type": "cleanup",
+        "paths": [
+          "%WINDIR%\\SoftwareDistribution\\Download"
+        ],
+        "stopServices": [
+          "wuauserv",
+          "bits"
+        ]
+      }
+    ],
+    "tags": [
+      "cleanup"
+    ]
+  },
+  {
+    "id": "cleanup.recycle-bin",
+    "title": "Empty Recycle Bin",
+    "description": "Permanently delete everything in the Recycle Bin.",
+    "category": "Cleanup",
+    "kind": "action",
+    "risk": "moderate",
+    "why": "Deleted files keep using disk space until the Recycle Bin is emptied.",
+    "danger": "Everything in the Recycle Bin is deleted permanently and can't be recovered.",
+    "operations": [
+      {
+        "type": "recycleBin"
+      }
+    ],
+    "tags": [
+      "cleanup"
+    ]
+  },
+  {
+    "id": "network.flush-dns",
+    "title": "Flush DNS cache",
+    "description": "Clear Windows' cached website address lookups.",
+    "category": "Network",
+    "kind": "action",
+    "risk": "safe",
+    "why": "Fixes sites that won't load after a DNS change or an outage. Windows simply looks the addresses up again.",
+    "operations": [
+      {
+        "type": "flushDns"
+      }
+    ],
+    "tags": [
+      "network"
+    ]
+  }
+]

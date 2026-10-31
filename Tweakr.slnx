@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Tweakr.App/Tweakr.App.csproj" />
+  <Project Path="Tweakr.Core/Tweakr.Core.csproj" />
+  <Project Path="Tweakr.Tweaks/Tweakr.Tweaks.csproj" />
+</Solution>

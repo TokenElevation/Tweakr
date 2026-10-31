@@ -1,0 +1,27 @@
+[
+  {
+    "id": "security.memory-integrity",
+    "title": "Disable Memory Integrity (HVCI)",
+    "description": "Turn off virtualization-based driver protection to recover some performance.",
+    "category": "Security",
+    "risk": "advanced",
+    "requiresReboot": true,
+    "why": "Memory Integrity runs kernel code-integrity checks inside a virtualized, isolated environment. That isolation costs some CPU time, mostly on older processors and in some games.",
+    "danger": "Memory Integrity stops malicious or vulnerable drivers from loading into the kernel. Turning it off makes the PC easier to compromise. Only do this if you understand the trade-off.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity",
+        "name": "Enabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      }
+    ],
+    "tags": [
+      "performance",
+      "gaming"
+    ]
+  }
+]

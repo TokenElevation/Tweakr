@@ -1,0 +1,181 @@
+[
+  {
+    "id": "privacy.advertising-id",
+    "title": "Disable advertising ID",
+    "description": "Stop apps from using a per-user ID for targeted ads.",
+    "category": "Privacy",
+    "risk": "safe",
+    "why": "The advertising ID lets apps build a cross-app profile. Turning it off only makes ads less targeted.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",
+        "name": "Enabled",
+        "kind": "DWord",
+        "on": 0,
+        "off": 1
+      }
+    ],
+    "tags": [
+      "privacy"
+    ]
+  },
+  {
+    "id": "privacy.activity-history",
+    "title": "Disable activity history",
+    "description": "Don't collect or upload your activity history.",
+    "category": "Privacy",
+    "risk": "safe",
+    "why": "Sets the group-policy values that stop Windows from recording and syncing app/document activity (Timeline).",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "PublishUserActivities",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "UploadUserActivities",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      }
+    ],
+    "tags": [
+      "privacy"
+    ]
+  },
+  {
+    "id": "privacy.telemetry",
+    "title": "Reduce telemetry",
+    "description": "Limit diagnostic data sent to Microsoft and stop the tracking service.",
+    "category": "Privacy",
+    "risk": "moderate",
+    "tags": [
+      "privacy",
+      "performance"
+    ],
+    "featured": true,
+    "why": "Sets the telemetry policy to its minimum and turns off the Connected User Experiences and Telemetry service (DiagTrack).",
+    "danger": "Some Windows diagnostics, feedback and Insider features rely on this data. Windows Home and Pro keep a basic level of telemetry regardless.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "name": "AllowTelemetry",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      },
+      {
+        "type": "service",
+        "name": "DiagTrack",
+        "on": "disabled",
+        "off": "auto"
+      }
+    ]
+  },
+  {
+    "id": "privacy.bing-search",
+    "title": "No web results in Start search",
+    "description": "Search Start for apps and files only, without sending your queries to Bing.",
+    "category": "Privacy",
+    "risk": "safe",
+    "tags": [
+      "privacy",
+      "performance"
+    ],
+    "featured": true,
+    "why": "Start search normally sends what you type to Bing. This keeps searches local and makes results appear faster.",
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+        "name": "DisableSearchBoxSuggestions",
+        "kind": "DWord",
+        "on": 1,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "privacy.feedback",
+    "title": "Disable feedback prompts",
+    "description": "Stop Windows from asking you to rate your experience.",
+    "category": "Privacy",
+    "risk": "safe",
+    "tags": [
+      "privacy"
+    ],
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Microsoft\\Siuf\\Rules",
+        "name": "NumberOfSIUFInPeriod",
+        "kind": "DWord",
+        "on": 0,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "privacy.recall",
+    "title": "Disable Windows Recall",
+    "description": "Turn off saving screen snapshots for Recall on Copilot+ PCs.",
+    "category": "Privacy",
+    "risk": "safe",
+    "tags": [
+      "privacy"
+    ],
+    "featured": true,
+    "why": "Recall periodically screenshots everything on screen so it can be searched later. This policy stops it from saving snapshots.",
+    "os": {
+      "minBuild": 26100
+    },
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+        "name": "DisableAIDataAnalysis",
+        "kind": "DWord",
+        "on": 1,
+        "off": "<delete>"
+      }
+    ]
+  },
+  {
+    "id": "privacy.copilot",
+    "title": "Disable Windows Copilot",
+    "description": "Turn off the Copilot sidebar through policy.",
+    "category": "Privacy",
+    "risk": "safe",
+    "tags": [
+      "privacy"
+    ],
+    "os": {
+      "minBuild": 22621
+    },
+    "operations": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "path": "Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+        "name": "TurnOffWindowsCopilot",
+        "kind": "DWord",
+        "on": 1,
+        "off": "<delete>"
+      }
+    ]
+  }
+]
